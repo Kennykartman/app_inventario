@@ -1,11 +1,13 @@
 import tkinter as tk
 from tkinter import messagebox
 from tkinter import ttk
+from psycopg2 import errors
 
 from models.asignacion import Asignacion
 from models.equipo import Equipo
 from models.modelo import Modelo
-from psycopg2 import errors
+from ui.ventana_detalle_equipo import VentanaDetalleEquipo
+
 
 
 class VentanaEquipo:
@@ -132,6 +134,12 @@ class VentanaEquipo:
             text='Ver historial',
             command=self.ver_historial
         ).pack(pady=5)
+
+        tk.Button(
+            self.root,
+            text='Ver detalle',
+            command=self.ver_detalle
+        ).pack()
 
     def cambiar_estado(self, nuevo_estado):
 
@@ -319,4 +327,16 @@ class VentanaEquipo:
                     h[5]
                 )
             )
+    def ver_detalle(self):
+
+        seleccionado = self.tabla.selection()
+
+        if not seleccionado:
+            messagebox.showwarning('Aviso','Selecciona un equipo')
+            return
+
+        item = seleccionado[0]
+        valores = self.tabla.item(item)['values']
+
+        VentanaDetalleEquipo(self.root, valores)
 

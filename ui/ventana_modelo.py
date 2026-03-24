@@ -56,6 +56,13 @@ class VentanaModelo:
             self.descripcion.get()
         )
 
+        if not str(modelo).isdigit():
+            messagebox.showwarning(
+                'Aviso',
+                'No puedes dejar campos en blanco'
+            )
+            return
+
         modelo.guardar()
 
         messagebox.showinfo('Exito', 'Modelo guardado')

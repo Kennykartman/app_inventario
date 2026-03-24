@@ -68,3 +68,20 @@ class Mantenimiento(BaseModel):
         '''
 
         conexion.ejecutar_query(sql, (id_mantenimiento,))
+
+    @staticmethod
+    def listar_por_equipo(id_equipo):
+
+        conexion = Mantenimiento()
+
+        sql = '''
+        SELECT
+            tipo,
+            fecha_programada,
+            estado
+        FROM mantenimientos
+        WHERE id_equipo = %s
+        ORDER BY fecha_programada DESC
+        '''
+
+        return conexion.ejecutar_query(sql, (id_equipo,), fetch=True)
