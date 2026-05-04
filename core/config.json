@@ -1,8 +1,0 @@
-{
-    "host": "localhost",
-    "database": "inventario_tecnico",
-    "user": "postgres",
-    "password": "Temporal-25",
-    "port": "5433",
-    "ruta_archivos": "\\\\Victus-lalito\\archiver"
-}
