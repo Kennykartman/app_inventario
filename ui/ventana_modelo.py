@@ -14,28 +14,28 @@ class VentanaModelo:
 
         # Marca fabricante
         tk.Label(self.root, text='Marca Fabricante').pack()
-        self.marca_fabricante = tk.Entry(self.root)
+        self.marca_fabricante = tk.Entry(self.root, width=35)
         self.marca_fabricante.pack()
 
         # Modelo fabricante
         tk.Label(self.root, text="Modelo Fabricante").pack()
-        self.modelo_fabricante = tk.Entry(self.root)
+        self.modelo_fabricante = tk.Entry(self.root, width=35)
         self.modelo_fabricante.pack()
 
         # Marca comercial
         tk.Label(self.root, text='Marca Comercial').pack()
-        self.marca_comercial = tk.Entry(self.root)
+        self.marca_comercial = tk.Entry(self.root, width=35)
         self.marca_comercial.pack()
 
         # Modelo comercial
         tk.Label(self.root, text='Modelo Comercial').pack()
-        self.modelo_comercial = tk.Entry(self.root)
+        self.modelo_comercial = tk.Entry(self.root, width=35)
         self.modelo_comercial.pack()
 
         # Descripcion
-        tk.Label(self.root, text='Descripcion').pack()
+        tk.Label(self.root, text='Descripcion', width=35).pack()
         self.descripcion = tk.Entry(self.root)
-        self.descripcion.pack()
+        self.descripcion.pack(fill='x', padx=10)
 
         # Boton guardar
         tk.Button(
@@ -48,20 +48,37 @@ class VentanaModelo:
 
     def guardar_modelo(self):
 
-        modelo = Modelo(
-            self.marca_fabricante.get(),
-            self.modelo_fabricante.get(),
-            self.marca_comercial.get(),
-            self.modelo_comercial.get(),
-            self.descripcion.get()
-        )
+        marca_fab = self.marca_fabricante.get().strip()
+        modelo_fab = self.modelo_fabricante.get().strip()
+        marca_com = self.marca_comercial.get().strip()
+        modelo_com = self.modelo_comercial.get().strip()
+        descripcion = self.descripcion.get().strip()
 
-        if not str(modelo).isdigit():
-            messagebox.showwarning(
-                'Aviso',
-                'No puedes dejar campos en blanco'
+        if not all([marca_fab, modelo_fab, marca_com, modelo_com, descripcion]):
+            messagebox.showerror(
+                "Aviso",
+                "No puedes dejar campos en blanco"
             )
             return
+
+        if len(modelo_fab) < 2:
+            messagebox.showerror(
+                'Aviso',
+                'Modelo fabricante muy corto'
+            )
+        if len(marca_com) < 2:
+            messagebox.showerror(
+                'Aviso',
+                'Modelo comercial muy corto'
+            )
+
+        modelo = Modelo(
+            marca_fab,
+            modelo_fab,
+            marca_com,
+            modelo_com,
+            descripcion
+        )
 
         modelo.guardar()
 

@@ -1,4 +1,6 @@
 from models.base_model import BaseModel
+from models.mantenimiento import Mantenimiento
+
 
 class Modelo(BaseModel):
 
@@ -50,3 +52,18 @@ class Modelo(BaseModel):
 
         conexion = Modelo()
         return conexion.ejecutar_query(sql, fetch=True)
+
+    @staticmethod
+    def obtener_reporte(id_mantenimiento):
+
+        conexion = Mantenimiento()
+
+        sql = '''
+        SELECT archivo_reporte,
+        FROM  mantenimientos
+        WHERE id_mantenimiento = %s
+        '''
+
+        resultado = conexion.ejecutar_query(sql, (id_mantenimiento,))
+
+        return resultado[0][0] if resultado else None

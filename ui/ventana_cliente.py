@@ -3,6 +3,7 @@ from tkinter import ttk
 from tkinter import messagebox
 
 from models.cliente import Cliente
+from utils.exportar_excel import exportar_treeview
 
 
 class VentanaCliente:
@@ -11,26 +12,26 @@ class VentanaCliente:
 
         self.root = tk.Toplevel(parent)
         self.root.title('Registro de Cliente')
-        self.root.geometry('1300x600')
+        self.root.geometry('1000x700')
 
         # Nombre
         tk.Label(self.root, text='Nombre').pack()
-        self.nombre = tk.Entry(self.root)
+        self.nombre = tk.Entry(self.root, width=30)
         self.nombre.pack()
 
         # Direccion
         tk.Label(self.root, text='Direccion').pack()
-        self.direccion = tk.Entry(self.root)
+        self.direccion = tk.Entry(self.root, width=80)
         self.direccion.pack()
 
         # Telefono
         tk.Label(self.root, text='Telefono').pack()
-        self.telefono = tk.Entry(self.root)
+        self.telefono = tk.Entry(self.root, width=30)
         self.telefono.pack()
 
         # email
         tk.Label(self.root, text='Email').pack()
-        self.email = tk.Entry(self.root)
+        self.email = tk.Entry(self.root, width=30)
         self.email.pack()
 
         # contrato
@@ -62,6 +63,18 @@ class VentanaCliente:
         self.tabla.pack(pady=20, fill='both', expand=True)
 
         self.cargar_clientes()
+
+        tk.Button(
+            self.root,
+            text='📥 Exportar TODO',
+            command=lambda: exportar_treeview(self.tabla)
+        ).pack(pady=5)
+
+        tk.Button(
+            self.root,
+            text='🗃️ Exportar Seleccionado',
+            command=lambda: exportar_treeview(self.tabla, True)
+        ).pack(pady=5)
 
     def cargar_clientes(self):
 

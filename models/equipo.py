@@ -62,10 +62,18 @@ class Equipo(BaseModel):
             e.serie_fabricante,
             m.marca_comercial,
             m.modelo_comercial,
-            e.estado
+            e.estado,
+            e.id_modelo,
+            m.frecuencia_mantenimiento,
+            a.tipo_equipo,
+            a.fecha_fin_garantia
+            
         FROM equipos e
         JOIN modelos m
             ON e.id_modelo = m.id_modelo
+        LEFT JOIN asignaciones a
+            ON e.id_equipo = a.id_equipo
+            AND a.activo = TRUE
         WHERE e.activo = TRUE
         ORDER BY e.id_equipo
         """
@@ -95,3 +103,17 @@ class Equipo(BaseModel):
         '''
 
         return conexion.ejecutar_query(sql, fetch=True)
+
+    @staticmethod
+    def dar_de_baja(id_equipo, motivo):
+
+        conexion = Equipo()
+
+        sql = '''
+        UPDATE equipos
+        SET estado = 'BAJA',
+            motivo_baja = %s
+        WHERE id_equipo = %s
+              '''
+
+        conexion.ejecutar_query(sql, (motivo, id_equipo))

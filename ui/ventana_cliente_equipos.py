@@ -4,6 +4,7 @@ from tkinter import messagebox
 
 from models.asignacion import Asignacion
 from models.cliente import Cliente
+from utils.exportar_excel import exportar_treeview
 
 class VentanaClienteEquipos:
 
@@ -49,6 +50,12 @@ class VentanaClienteEquipos:
         self.tabla.heading('Fecha', text='Fecha')
 
         self.tabla.pack(fill='both', expand=True)
+
+        tk.Button(
+            self.root,
+            text='📥 Exportar TODO',
+            command=lambda: exportar_treeview(self.tabla)
+        ).pack(pady=5)
 
         # Funcion cargar
 

@@ -1,5 +1,6 @@
 import tkinter as tk
-from tkinter import ttk
+from tkinter import ttk, messagebox
+
 
 from models.asignacion import Asignacion
 from models.mantenimiento import Mantenimiento
@@ -15,14 +16,40 @@ class VentanaDetalleEquipo:
         self.equipo = equipo
         self.id_equipo = equipo[0]
 
+        estado = equipo[4]
+
+        color = {
+            'ALMACEN': 'blue',
+            'INSTALDO': 'green',
+            'REPARACION': 'orange',
+            'BAJA': 'red'
+        }.get(estado, 'black')
+
+        tk.Label(
+            self.root,
+            text=f"ESTADO ACTUAL: {estado}",
+            fg=color,
+            font=('Arial', 12, 'bold')
+        ).pack(pady=10)
+
         # ===== INFO EQUIPO =====
+        tk.Label(self.root, text="📦 DATOS DEL EQUIPO", font=("Arial", 10, "bold")).pack()
+
         tk.Label(self.root, text=f'Serie: {equipo[1]}').pack()
         tk.Label(self.root, text=f'Marca: {equipo[2]}').pack()
         tk.Label(self.root, text=f'Modelo: {equipo[3]}').pack()
         tk.Label(self.root, text=f'Estado: {equipo[4]}').pack()
 
+        # Historico de archivos
+        tk.Button(
+            self.root,
+            text="📎 Ver Historico de archivos",
+            command=self.ver_archivos
+        ).pack()
+
         # ===== ASIGNACIONES =====
-        tk.Label(self.root, text='Asignaciones').pack(pady=10)
+
+        tk.Label(self.root, text="📍 HISTORIAL DE ASIGNACIONES", font=("Arial", 10, "bold")).pack(pady=10)
 
         self.tabla_asignaciones = ttk.Treeview(
             self.root,
@@ -42,13 +69,16 @@ class VentanaDetalleEquipo:
         self.tabla_asignaciones.tag_configure("finalizado", background="#f8d7da")  # rojo claro
 
         # ===== Mantenimientos =====
-        tk.Label(self.root, text='Mantenimientos').pack(pady=10)
+        tk.Label(self.root, text="🛠 HISTORIAL DE MANTENIMIENTOS", font=("Arial", 10, "bold")).pack(pady=10)
 
         self.tabla_mantenimientos = ttk.Treeview(
             self.root,
             columns=('Tipo', 'Fecha', 'Estado'),
             show='headings'
         )
+
+        self.tabla_asignaciones.tag_configure("activo", background="#a8e6a3")
+        self.tabla_asignaciones.tag_configure("finalizado", background="#eeeeee")
 
         self.tabla_mantenimientos.heading('Tipo', text='Tipo')
         self.tabla_mantenimientos.heading('Fecha', text='Fecha')
@@ -96,9 +126,20 @@ class VentanaDetalleEquipo:
         mantenimientos = Mantenimiento.listar_por_equipo(self.id_equipo)
 
         for m in mantenimientos:
+            estado = "PENDIENTE" if m[2] == "PENDIENTE" else "REALIZADO"
 
             self.tabla_mantenimientos.insert(
-                '',
-                'end',
-                values=m
+                "",
+                "end",
+                values=(
+                    m[0],
+                    m[1],
+                    estado
+                )
             )
+    def ver_archivos(self):
+
+        id_equipo = self.id_equipo
+
+        from ui.ventana_archivos_historicos import VentanaArchivosHistorico
+        VentanaArchivosHistorico(self.root, id_equipo)
