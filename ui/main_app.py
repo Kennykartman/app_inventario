@@ -1,12 +1,16 @@
 import tkinter as tk
 from tkinter import messagebox
 
+from utils.updates import verificar_actualizacion
+
+
 class Mainapp:
 
     def __init__(self, root, rol):
 
         self.root = root
         self.rol = rol
+        verificar_actualizacion()
 
         self.root.title('Sistema')
         self.root.geometry('600x300')

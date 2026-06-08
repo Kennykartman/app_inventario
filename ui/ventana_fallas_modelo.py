@@ -63,10 +63,15 @@ class VentanaFallasModelo:
         )
 
         self.tabla.heading('codigo', text='Codigo')
-        self.tabla.heading('descripcion', text='Falla')
+        self.tabla.heading('descripcion', text='Descripcion de falla')
         self.tabla.heading('solucion', text='Solucion')
 
         self.tabla.pack(fill='both', expand=True)
+
+        self.tabla.bind(
+            '<Double-1>',
+            self.ver_detalle_falla
+        )
 
         # ==================
         # GUARDAR
@@ -131,3 +136,74 @@ class VentanaFallasModelo:
 
         for f in fallas:
             self.tabla.insert('', 'end', values=f)
+
+    def ver_detalle_falla(self, event):
+
+        seleccionado = self.tabla.selection()
+
+        if not seleccionado:
+            return
+
+        datos = self.tabla.item(
+            seleccionado[0]
+        )['values']
+
+        codigo = datos[0]
+        falla = datos[1]
+        solucion = datos[2]
+
+        ventana = tk.Toplevel(self.root)
+
+        ventana.title(
+            f'Detalle: {codigo}'
+        )
+
+        ventana.geometry(
+            '700x500'
+        )
+
+        tk.Label(
+            ventana,
+            text=f'codigo: {codigo}',
+            font=('segoe UI',14,'bold')
+        ).pack(
+            pady=10
+        )
+
+        tk.Label(
+            ventana,
+            text='Descripcion de falla: ',
+            font=('Segoe UI',11,'bold')
+        ).pack(
+            anchor='w',
+            padx=20
+        )
+
+        tk.Message(
+            ventana,
+            text=falla,
+            width=650,
+            font=('Segoe UI',10)
+        ).pack(
+            padx=20,
+            pady=10
+        )
+
+        tk.Label(
+            ventana,
+            text='Solucion de falla: ',
+            font=('Segoe UI',11,'bold')
+        ).pack(
+            anchor='w',
+            padx=20
+        )
+
+        tk.Message(
+            ventana,
+            text=solucion,
+            width=650,
+            font=('Segoe UI',10)
+        ).pack(
+            padx=20,
+            pady=10
+        )

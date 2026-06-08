@@ -12,7 +12,7 @@ class VentanaCliente:
 
         self.root = tk.Toplevel(parent)
         self.root.title('Registro de Cliente')
-        self.root.geometry('1000x700')
+        self.root.geometry('1200x700')
 
         # Nombre
         tk.Label(self.root, text='Nombre').pack()

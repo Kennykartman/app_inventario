@@ -98,11 +98,16 @@ class Asignacion(BaseModel):
         SELECT
             a.id_asignacion,
             e.serie_interna,
+            
+            m.marca_comercial || ' - ' ||
+            m.modelo_comercial AS equipo,
+            
             c.nombre,
             a.ubicacion,
             a.fecha_inicio
         FROM asignaciones a
         JOIN equipos e ON a.id_equipo = e.id_equipo
+        JOIN modelos m ON e.id_modelo = m.id_modelo
         JOIN clientes c ON a.id_cliente = c.id_cliente
         WHERE a.activo = TRUE
         ORDER BY a.fecha_inicio DESC

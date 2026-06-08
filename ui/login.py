@@ -5,9 +5,9 @@ import tkinter as tk
 from PIL import Image, ImageTk
 
 from models.usuario import Usuario
+from utils.estilos import COLOR_PRIMARIO
 from utils.security import validar_password
-
-
+from utils.componentes import boton, boton_secundario
 
 
 class VentanaLogin:
@@ -27,7 +27,7 @@ class VentanaLogin:
 
             return os.path.join(base, rel_path)
 
-        ruta_logo = recurso_path('assets/logo.png')
+        ruta_logo = recurso_path('assets/logo.ico')
 
 
         img = Image.open(ruta_logo)
@@ -47,17 +47,18 @@ class VentanaLogin:
         self.password = tk.Entry(root, show='*')
         self.password.pack()
 
-        tk.Button(
-            root,
-            text='Ingresar',
-            command=self.login
+        boton(
+            self.root,
+            "Ingresar",
+            self.login,
+            COLOR_PRIMARIO
         ).pack(pady=10)
 
-        tk.Button(
-            root,
-            text='Configurar servidor',
-            command=self.abrir_config
-        ).pack()
+        boton_secundario(
+            self.root,
+            'Configurar servidor',
+            self.abrir_config
+        ).pack(pady=10)
 
     def login(self):
 

@@ -1,7 +1,6 @@
 import tkinter as tk
 from tkinter import ttk, filedialog, messagebox
 
-from models.archivo import Archivo
 from utils.rutas import obtener_ruta_archivos
 import shutil
 import os

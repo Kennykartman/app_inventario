@@ -17,7 +17,7 @@ class VentanaAsignacion:
 
         self.root = tk.Toplevel(parent)
         self.root.title('Asignar equipo a cliente')
-        self.root.geometry('1000x700')
+        self.root.geometry('1300x700')
         self.centrar_ventana()
 
 
@@ -109,11 +109,12 @@ class VentanaAsignacion:
         # Tabla
         self.tabla = ttk.Treeview(
             self.root,
-            columns=('ID', 'Equipo', 'Cliente', 'Ubicacion', 'Fecha'),
+            columns=('ID', 'Serie', 'Equipo', 'Cliente', 'Ubicacion', 'Fecha'),
             show='headings',
         )
 
         self.tabla.heading('ID', text='ID')
+        self.tabla.heading('Serie', text='Numero de Serie')
         self.tabla.heading('Equipo', text='Equipo')
         self.tabla.heading('Cliente', text='Cliente')
         self.tabla.heading('Ubicacion', text='Ubicacion')

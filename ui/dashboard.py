@@ -19,7 +19,7 @@ class Dashboard:
 
         self.root.geometry(f'{ancho}x{alto}+{x}+{y}')
         self.root.transient(root)
-        self.root.grab_set()
+        # self.root.grab_set() Para bloquear la ventana
 
         tk.Label(
             self.root,

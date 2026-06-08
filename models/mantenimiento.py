@@ -1,3 +1,4 @@
+from core.config import conectar
 from models.base_model import BaseModel
 
 class Mantenimiento(BaseModel):
@@ -255,3 +256,76 @@ class Mantenimiento(BaseModel):
         '''
 
         return conexion.ejecutar_query(sql, fetch=True)
+
+    @staticmethod
+    def obtener_info(id_mantenimiento):
+
+        conexion = Mantenimiento()
+
+        sql = '''
+        SELECT 
+            m.descripcion, 
+            m.diagnostico, 
+            m.solucion,
+            
+            e.serie_interna,
+            
+            c.nombre,
+            
+            m.tipo,
+            m.fecha_programada,
+            m.estado,
+            m.tecnico,
+            
+            m.archivo_diagnostico,
+            m.archivo_reporte
+            
+        FROM mantenimientos m
+        JOIN equipos e
+            ON m.id_equipo = e.id_equipo
+        LEFT JOIN asignaciones a
+            ON e.id_equipo = a.id_equipo
+            AND a.activo = TRUE
+        LEFT JOIN clientes c
+            ON a.id_cliente = c.id_cliente
+        WHERE M.id_mantenimiento = %s
+        '''
+        resultado = conexion.ejecutar_query(sql, (id_mantenimiento,), fetch=True)
+        return resultado[0]
+
+    @staticmethod
+    def agregar_comentario(id_mantenimiento, comentario):
+
+        conexion = Mantenimiento()
+
+        sql = '''
+        INSERT INTO comentarios_mantenimiento
+              (id_mantenimiento, comentario
+              )
+              VALUES (%s, %s)
+              '''
+        conexion.ejecutar_query(sql, (id_mantenimiento, comentario,))
+
+        sql_update = '''
+        UPDATE mantenimientos
+        SET ultima_actualizacion = NOW()
+            WHERE id_mantenimiento = %s
+        '''
+
+        conexion.ejecutar_query(sql_update, (id_mantenimiento,))
+
+    @staticmethod
+    def obtener_comentarios(id_mantenimiento):
+
+        conexion = Mantenimiento()
+
+        sql = '''
+        SELECT 
+            comentario,
+            fecha
+        FROM comentarios_mantenimiento
+            WHERE id_mantenimiento = %s
+            ORDER BY fecha DESC
+        '''
+
+        return conexion.ejecutar_query(sql, (id_mantenimiento,), fetch=True)

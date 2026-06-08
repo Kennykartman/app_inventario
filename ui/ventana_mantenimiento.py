@@ -48,7 +48,8 @@ class VentanaMantenimiento:
         self.combo_equipo = ttk.Combobox(
             self.root,
             textvariable=self.equipo_var,
-            values=equipo_text
+            values=equipo_text,
+            width=40
         )
 
         self.combo_equipo.pack()
@@ -120,10 +121,6 @@ class VentanaMantenimiento:
                   text='Abrir reportes',
                   command=self.abrir_reportes).pack(side="right", padx=5)
 
-        # ===== Diagnostico ======
-        tk.Button(frame_botones,
-                  text='Diagnostico',
-                  command=self.abrir_diagnostico).pack(side='right', padx=5)
 
         # ===== TABLA =====
 
@@ -142,6 +139,11 @@ class VentanaMantenimiento:
         self.tabla.tag_configure("PENDIENTE", background="#fff3cd")  # amarillo
         self.tabla.tag_configure("REALIZADO", background="#d4edda")  # verde
         self.tabla.pack(pady=20, fill='both', expand=True)
+
+        self.tabla.bind(
+            '<Double-1>',
+            self.ver_detalle_mantenimiento
+        )
 
         self.cargar_mantenimientos()
 
@@ -222,7 +224,7 @@ class VentanaMantenimiento:
 
         ID de quipo: {id_equipo}
         Tipo: {tipo}
-        Fecha de servicio:{fecha}
+        Fecha de servicio: {fecha}
         Tecnico: {tecnico}
         Descripcion de servicio: {descripcion}
         '''
@@ -292,35 +294,70 @@ class VentanaMantenimiento:
             return
 
         # Pedir una solucion Obligatoria
-        solucion = simpledialog.askstring(
-            'Resolucion',
-            'Describe la solucion aplicada: '
+        ventana_solucion = tk.Toplevel(self.root)
+        ventana_solucion.title('Resolucion de mantenimiento')
+        ventana_solucion.geometry('700x500')
+
+        tk.Label(
+            ventana_solucion,
+            text='Describe la solucion aplicada: ',
+            font=('Segoe UI', 11, 'bold')
+        ).pack(pady=10)
+
+        texto_solucion = tk.Text(
+            ventana_solucion,
+            height=15,
+            width=80,
+            wrap='word'
         )
 
-        if not solucion:
-            messagebox.showwarning('Aviso', 'Debes ingresar la solucion')
-            return
+        texto_solucion.pack(
+            padx=20,
+            pady=10,
+            fill='both',
+            expand=True
+        )
+
+        def guardar_solucion():
+            solucion = texto_solucion.get(
+                '1.0',
+                tk.END
+            ).strip()
+
+            if not solucion:
+                messagebox.showwarning(
+                    'Aviso',
+                    'Debes ingresar la solucion'
+                )
+                return
 
         # Guardar
-        Mantenimiento.completar(id_mantenimiento, solucion)
+            Mantenimiento.completar(id_mantenimiento, solucion)
 
-        emails = Usuario.obtener_email()
+            emails = Usuario.obtener_email()
 
-        mensaje = f'''
-        Mantenimiento Finalizado
-        ID de mantenimiento: {id_mantenimiento}
-        solucion: {solucion}
-        Fecha: {datetime.now().date()}
-        '''
-        enviar_correo(
-            emails,
-            'Servicio completado',
-            mensaje
-        )
+            mensaje = f'''
+            Mantenimiento Finalizado
+            ID de mantenimiento: {id_mantenimiento}
+            solucion: {solucion}
+            Fecha: {datetime.now().date()}
+            '''
+            enviar_correo(
+                emails,
+                'Servicio completado',
+                mensaje
+            )
 
-        self.cargar_mantenimientos()
+            self.cargar_mantenimientos()
+            ventana_solucion.destroy()
+            messagebox.showinfo('Exito', 'Mantenimiento completado')
 
-        messagebox.showinfo('Exito', 'Mantenimiento completado')
+        tk.Button(
+            ventana_solucion,
+            text='Guardar solucion',
+            font=('Segoe UI', 10, 'bold'),
+            command=guardar_solucion
+        ).pack(pady=15)
 
     def cargar_fallas_sugeridas(self, event=None):
 
@@ -479,6 +516,17 @@ class VentanaMantenimiento:
 
     def abrir_diagnostico(self):
 
+        mantenimiento = (self.obtener_mantenimiento_seleccionado())
+
+        self.abrir_diagnostico_custom(mantenimiento)
+
+    def abrir_diagnostico_desde_detalle(self, id_mantenimiento):
+
+        mantenimiento = (id_mantenimiento,)
+        self.abrir_diagnostico_custom(mantenimiento)
+
+    def abrir_diagnostico_custom(self, mantenimiento):
+
         mantenimiento = self.obtener_mantenimiento_seleccionado()
 
         if not mantenimiento:
@@ -555,3 +603,339 @@ class VentanaMantenimiento:
             ventana.destroy()
 
         tk.Button(ventana, text='Guardar estado', command=guardar).pack()
+
+    def ver_detalle_mantenimiento(self, event):
+
+        seleccionado = self.tabla.selection()
+
+        if not seleccionado:
+            return
+
+        datos = self.tabla.item(
+            seleccionado[0]
+        )['values']
+
+        id_mantenimiento = datos[0]
+
+        detalle = Mantenimiento.obtener_info(
+            id_mantenimiento
+        )
+
+        ventana = tk.Toplevel(self.root)
+        ventana.title('Detalle mantenimiento')
+        ventana.geometry('900x800')
+
+        # ==========================
+        # DATOS
+        # ==========================
+
+        descripcion = detalle[0]
+        diagnostico = detalle[1]
+        solucion = detalle[2]
+
+        serie = detalle[3]
+        cliente = detalle[4]
+
+        tipo = detalle[5]
+        fecha = detalle[6]
+        estado = detalle[7]
+        tecnico = detalle[8]
+
+        archivo_diag = detalle[9]
+        archivo_rep = detalle[10]
+
+        # ==========================
+        # FUNCION AUXILIAR
+        # ==========================
+
+        def agregar_seccion(titulo, contenido):
+
+            tk.Label(
+                ventana,
+                text=titulo,
+                font=('Segoe UI', 12, 'bold')
+            ).pack(
+                anchor='w',
+                padx=20,
+                pady=(10, 2)
+            )
+
+            tk.Message(
+                ventana,
+                text=contenido,
+                width=800
+            ).pack(
+                anchor='w',
+                padx=20
+            )
+
+        # ==========================
+        # INFORMACION GENERAL
+        # ==========================
+
+        frame_info = tk.LabelFrame(
+            ventana,
+            text='Información General',
+            font=('Segoe UI', 10, 'bold')
+        )
+
+        frame_info.pack(
+            fill='x',
+            padx=20,
+            pady=10
+        )
+
+        tk.Label(
+            frame_info,
+            text=f'Serie: {serie}'
+        ).grid(
+            row=0,
+            column=0,
+            sticky='w',
+            padx=10,
+            pady=5
+        )
+
+        tk.Label(
+            frame_info,
+            text=f'Cliente: {cliente or "Sin asignar"}'
+        ).grid(
+            row=0,
+            column=1,
+            sticky='w',
+            padx=10,
+            pady=5
+        )
+
+        tk.Label(
+            frame_info,
+            text=f'Tipo: {tipo}'
+        ).grid(
+            row=1,
+            column=0,
+            sticky='w',
+            padx=10,
+            pady=5
+        )
+
+        tk.Label(
+            frame_info,
+            text=f'Estado: {estado}'
+        ).grid(
+            row=1,
+            column=1,
+            sticky='w',
+            padx=10,
+            pady=5
+        )
+
+        tk.Label(
+            frame_info,
+            text=f'Técnico: {tecnico or "Sin asignar"}'
+        ).grid(
+            row=2,
+            column=0,
+            sticky='w',
+            padx=10,
+            pady=5
+        )
+
+        tk.Label(
+            frame_info,
+            text=f'Fecha: {fecha}'
+        ).grid(
+            row=2,
+            column=1,
+            sticky='w',
+            padx=10,
+            pady=5
+        )
+
+        # ==========================
+        # CONTENIDO
+        # ==========================
+
+        agregar_seccion(
+            '📝 Reporte inicial',
+            descripcion or 'Sin registro'
+        )
+
+        agregar_seccion(
+            '🔍 Diagnóstico',
+            diagnostico or 'Sin diagnóstico'
+        )
+
+        agregar_seccion(
+            '🛠 Solución',
+            solucion or 'Pendiente'
+        )
+
+        # ==========================
+        # ARCHIVOS
+        # ==========================
+
+        frame_archivos = tk.LabelFrame(
+            ventana,
+            text='📎 Archivos Adjuntos'
+        )
+
+        frame_archivos.pack(
+            fill='x',
+            padx=20,
+            pady=10
+        )
+
+        if archivo_diag:
+            tk.Button(
+                frame_archivos,
+                text='📄 Abrir Diagnóstico',
+                command=lambda: os.startfile(archivo_diag)
+            ).pack(
+                anchor='w',
+                padx=10,
+                pady=5
+            )
+
+        if archivo_rep:
+            tk.Button(
+                frame_archivos,
+                text='📄 Abrir Reporte Final',
+                command=lambda: os.startfile(archivo_rep)
+            ).pack(
+                anchor='w',
+                padx=10,
+                pady=5
+            )
+
+        # ==========================
+        # COMENTARIOS
+        # ==========================
+
+        frame_comentarios = tk.LabelFrame(
+            ventana,
+            text='🕓 Comentarios'
+        )
+        frame_comentarios.pack(
+            fill='both',
+            expand=True,
+            padx=20,
+            pady=10
+        )
+        # ==========================
+        # HISTORIAL
+        # ==========================
+        historial = tk.Text(
+            frame_comentarios,
+            height=8,
+            state='normal'
+        )
+        historial.pack(
+            fill='both',
+            expand=True,
+            padx=10,
+            pady=5
+        )
+
+        entrada_comentario = tk.Text(
+            frame_comentarios,
+            height=3
+        )
+        entrada_comentario.pack(
+            fill='x',
+            padx=10,
+            pady=5
+        )
+
+        def cargar_comentarios():
+
+            historial.see('1.0')
+            historial.config(
+                state='normal'
+            )
+            historial.delete('1.0', tk.END)
+
+            comentarios = Mantenimiento.obtener_comentarios(
+                id_mantenimiento
+            )
+
+            for comentario, fecha in comentarios:
+                historial.tag_config(
+                    'fecha',
+                    font=('Segoe UI', 9, 'bold')
+                )
+
+                historial.tag_config(
+                    'separador',
+                    font=('Consolas', 9)
+                )
+                historial.insert(
+                    tk.END,
+                    '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n',
+                    'separador'
+                )
+
+                historial.insert(
+                    tk.END,
+                    f'📅 {fecha:%Y-%m-%d %H:%M}\n\n',
+                    'fecha'
+                )
+
+                historial.insert(
+                    tk.END,
+                    f'{comentario}\n\n'
+                )
+            historial.config(
+                state='disabled'
+            )
+
+        def guardar_comentario():
+
+            comentario = entrada_comentario.get(
+                '1.0',
+                tk.END
+            ).strip()
+
+            if not comentario:
+                messagebox.showwarning(
+                    'Aviso',
+                    'Escribe un comentario para guardar'
+                )
+                return
+
+            Mantenimiento.agregar_comentario(
+                id_mantenimiento,
+                comentario
+            )
+
+            entrada_comentario.delete(
+                '1.0',
+                tk.END
+            )
+
+            cargar_comentarios()
+
+        tk.Button(
+            frame_comentarios,
+            text='💬 Agregar comentario',
+            command=guardar_comentario
+        ).pack()
+
+        # ==========================
+        # CARGAR COMENTARIOS
+        # ==========================
+        cargar_comentarios()
+
+        # ==========================
+        # ACCIONES
+        # ==========================
+
+        tk.Button(
+            ventana,
+            text='✏️ Editar diagnóstico',
+            command=lambda:
+            self.abrir_diagnostico_desde_detalle(
+                id_mantenimiento
+            )
+        ).pack(
+            pady=20
+        )
