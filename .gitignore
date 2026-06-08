@@ -1,6 +1,12 @@
 .env
+
 __pycache__/
 *.pyc
 *.pyo
-/core
-*.json
+
+build/
+dist/
+
+logs/
+
+config/config.json
