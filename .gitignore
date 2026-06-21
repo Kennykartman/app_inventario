@@ -1,12 +1,42 @@
-.env
+# Entorno virtual
+.venv/
+venv/
 
+# PyCharm
+.idea/
+
+# IA (si son archivos temporales)
+.ai/
+
+# Python
 __pycache__/
 *.pyc
 *.pyo
 
+# Variables
+.env
+
+# Build
 build/
 dist/
 
+# Logs
 logs/
+Logs/
 
+# Configuración local
 config/config.json
+
+# Windows
+Thumbs.db
+Desktop.ini
+
+# Respaldos
+*.backup
+*.bak
+
+# Base de datos
+*.sql
+
+# Archivos temporales
+*.tmp
